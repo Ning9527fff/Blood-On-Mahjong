@@ -238,4 +238,61 @@ const onTileClick = (tile: Tile) => {
   background: linear-gradient(135deg, #1f8a52, #46c574);
   color: #03100a;
 }
+
+@media (max-width: 768px) {
+  .player-area {
+    gap: 4px;
+    padding: 5px 6px 6px;
+    border-radius: 9px;
+  }
+
+  .player-header {
+    font-size: 0.72rem;
+  }
+
+  .player-status,
+  .discards-label {
+    font-size: 0.65rem;
+  }
+
+  .player-melds {
+    gap: 3px;
+    min-height: 0;
+  }
+
+  .meld {
+    padding: 2px;
+  }
+
+  .discards-row {
+    gap: 1px;
+    max-height: 58px;
+    overflow: hidden;
+  }
+
+  .player-hand {
+    min-height: 42px;
+    padding: 2px;
+    overflow: visible;
+  }
+}
+
+@media (max-width: 420px) {
+  .player-area {
+    background: rgba(5, 14, 10, 0.7);
+  }
+
+  .player-status,
+  .discards-label {
+    display: none;
+  }
+
+  .player-hand {
+    min-height: 37px;
+  }
+
+  .discards-row {
+    max-height: 48px;
+  }
+}
 </style>

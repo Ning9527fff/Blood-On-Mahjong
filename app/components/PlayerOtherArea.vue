@@ -234,4 +234,59 @@ const props = defineProps<{
   align-items: center;
   flex-wrap: nowrap;
 }
+
+@media (max-width: 768px) {
+  .player-other {
+    gap: 2px;
+    font-size: 0.68rem;
+  }
+
+  .player-other-name {
+    max-width: 92px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .player-other-melds,
+  .side-layout {
+    gap: 2px;
+  }
+
+  .other-meld {
+    padding: 1px 2px;
+  }
+
+  .discards-label {
+    display: none;
+  }
+
+  .discards-row {
+    gap: 1px;
+    max-height: 58px;
+    overflow: hidden;
+  }
+
+  .discards-row--vertical {
+    max-height: 150px;
+  }
+}
+
+@media (max-width: 420px) {
+  .player-other {
+    font-size: 0.62rem;
+  }
+
+  .player-other-name {
+    max-width: 70px;
+  }
+
+  .side-layout {
+    gap: 1px;
+  }
+
+  .discards-row--vertical {
+    max-height: 118px;
+  }
+}
 </style>

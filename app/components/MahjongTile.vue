@@ -51,8 +51,8 @@ const onClick = () => {
 
 <style scoped>
 .tile {
-  width: 40px;
-  height: 60px;
+  width: clamp(24px, 3.15vw, 40px);
+  height: clamp(35px, 4.72vw, 60px);
   border-radius: 6px;
   background: #fdfaf3;
   border: 1px solid #e1d4b8;
@@ -74,8 +74,8 @@ const onClick = () => {
 }
 
 .tile--small {
-  width: 32px;
-  height: 48px;
+  width: clamp(18px, 2.5vw, 32px);
+  height: clamp(27px, 3.75vw, 48px);
   font-size: 0.8rem;
 }
 
@@ -141,45 +141,37 @@ const onClick = () => {
   box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.2);
 }
 
-@media (max-width: 1300px) {
-  .tile {
-    width: 25px;
-    height: 30px;
-  }
-
-  .tile--small {
-    width: 25px;
-    height: 30px;
-  }
-
+@media (max-width: 768px) {
   .tile-rank {
-    font-size: 0.7rem;
+    font-size: 0.72rem;
     line-height: 1
   }
 
   .tile-suit {
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     line-height: 1
   }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 420px) {
   .tile {
-    width: 20px;
-    height: 25px;
+    width: clamp(21px, 6.2vw, 25px);
+    height: clamp(31px, 9.2vw, 37px);
+    margin: 0;
+    border-radius: 4px;
   }
 
   .tile--small {
-    width: 20px;
-    height: 25px;
+    width: clamp(16px, 4.6vw, 19px);
+    height: clamp(23px, 6.9vw, 29px);
   }
 
   .tile-rank {
-    font-size: 0.5rem;
+    font-size: 0.64rem;
   }
 
   .tile-suit {
-    font-size: 0.5rem;
+    font-size: 0.6rem;
   }
 }
 

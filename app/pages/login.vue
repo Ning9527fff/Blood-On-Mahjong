@@ -68,10 +68,15 @@ const handleLogin = async () => {
 <style scoped>
 .mahjong-page {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding:
+    max(16px, env(safe-area-inset-top))
+    max(16px, env(safe-area-inset-right))
+    max(16px, env(safe-area-inset-bottom))
+    max(16px, env(safe-area-inset-left));
   background: radial-gradient(circle at top, #153b2f, #07130e);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   color: #f5f5f5;
@@ -125,7 +130,7 @@ const handleLogin = async () => {
   outline: none;
   background: rgba(255, 255, 255, 0.08);
   color: #fff;
-  font-size: 1rem;
+  font-size: 16px;
 }
 
 .id-input:focus {
@@ -176,6 +181,14 @@ const handleLogin = async () => {
 @media (max-width: 520px) {
   .mahjong-card {
     padding: 28px 22px;
+  }
+
+  .mahjong-title {
+    font-size: 1.65rem;
+  }
+
+  .mahjong-button {
+    min-height: 48px;
   }
 }
 </style>

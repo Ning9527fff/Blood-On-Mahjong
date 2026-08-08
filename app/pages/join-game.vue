@@ -147,12 +147,18 @@ onMounted(() => {
 <style scoped>
 .mahjong-page {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
   background: radial-gradient(circle at top, #153b2f, #07130e);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   color: #f5f5f5;
+  padding:
+    max(16px, env(safe-area-inset-top))
+    max(16px, env(safe-area-inset-right))
+    max(16px, env(safe-area-inset-bottom))
+    max(16px, env(safe-area-inset-left));
 }
 
 .mahjong-card.join-card {
@@ -194,7 +200,7 @@ onMounted(() => {
   background: rgba(18, 43, 33, 0.9);
   color: #f5f5f5;
   padding: 12px 16px;
-  font-size: 1rem;
+  font-size: 16px;
 }
 
 .mahjong-available {
@@ -298,5 +304,72 @@ onMounted(() => {
   background: rgba(22, 51, 40, 0.95);
   color: #e0f2e9;
   border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+@media (max-width: 600px) {
+  .mahjong-page {
+    align-items: flex-start;
+  }
+
+  .mahjong-card.join-card {
+    width: 100%;
+    padding: 20px 16px;
+    gap: 18px;
+    border-radius: 16px;
+  }
+
+  .join-header {
+    align-items: center;
+  }
+
+  .mahjong-title {
+    font-size: 1.45rem;
+  }
+
+  .mahjong-subtitle {
+    font-size: 0.82rem;
+    line-height: 1.4;
+  }
+
+  .manual-controls {
+    gap: 8px;
+  }
+
+  .manual-controls input {
+    min-width: 0;
+    padding: 12px 14px;
+  }
+
+  .mahjong-button {
+    min-height: 44px;
+    padding: 10px 16px;
+  }
+
+  .available-item {
+    align-items: stretch;
+  }
+
+  .available-details {
+    min-width: 0;
+  }
+
+  .available-id {
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 380px) {
+  .join-header {
+    align-items: flex-start;
+  }
+
+  .manual-controls,
+  .available-item {
+    flex-direction: column;
+  }
+
+  .mahjong-button.join {
+    width: 100%;
+  }
 }
 </style>

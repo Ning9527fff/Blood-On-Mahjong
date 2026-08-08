@@ -373,12 +373,18 @@ const logout = async () => {
 <style scoped>
 .mahjong-page {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
   background: radial-gradient(circle at top, #153b2f, #07130e);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   color: #f5f5f5;
+  padding:
+    max(16px, env(safe-area-inset-top))
+    max(16px, env(safe-area-inset-right))
+    max(16px, env(safe-area-inset-bottom))
+    max(16px, env(safe-area-inset-left));
 }
 
 .mahjong-card {
@@ -570,6 +576,7 @@ const logout = async () => {
   .mahjong-button {
     font-size: 0.85rem;
     padding: 10px 18px;
+    min-height: 46px;
   }
 
   .create-mode-options {
@@ -588,7 +595,7 @@ const logout = async () => {
 
   .mahjong-button {
     font-size: 0.8rem;
-    padding: 8px 14px;
+    padding: 10px 14px;
   }
 }
 </style>

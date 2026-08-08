@@ -156,10 +156,15 @@ const scoreClass = (value: number) => {
 <style scoped>
 .history-page {
   min-height: 100vh;
+  min-height: 100dvh;
   background: radial-gradient(circle at top, #153b2f, #07130e);
   display: flex;
   justify-content: center;
-  padding: 24px;
+  padding:
+    max(16px, env(safe-area-inset-top))
+    max(16px, env(safe-area-inset-right))
+    max(16px, env(safe-area-inset-bottom))
+    max(16px, env(safe-area-inset-left));
 }
 
 .history-shell {
@@ -199,6 +204,7 @@ const scoreClass = (value: number) => {
   color: inherit;
   cursor: pointer;
   font-weight: 600;
+  min-height: 44px;
 }
 
 .ghost-button:disabled {
@@ -348,7 +354,26 @@ const scoreClass = (value: number) => {
 
 @media (max-width: 640px) {
   .history-shell {
-    padding: 20px;
+    padding: 18px 14px;
+  }
+
+  .history-header {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 8px;
+  }
+
+  .history-header h1 {
+    font-size: 1.15rem;
+  }
+
+  .subtitle {
+    font-size: 0.76rem;
+  }
+
+  .ghost-button {
+    padding: 8px 10px;
+    font-size: 0.82rem;
   }
 
   .card-header {
@@ -358,6 +383,11 @@ const scoreClass = (value: number) => {
 
   .meta {
     flex-direction: row;
+  }
+
+  .filter-bar {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
 </style>

@@ -1,7 +1,7 @@
 <template>
-  <div class="mahjong-page" :class="{ 'mobile-portrait': shouldRotateView }">
-    <div class="room-viewport" :class="{ 'room-viewport--rotated': shouldRotateView }">
-      <div class="room-container" :class="{ 'room-container--rotated': shouldRotateView }">
+  <div class="mahjong-page">
+    <div class="room-viewport">
+      <div class="room-container">
       <header class="room-header">
         <div class="room-info">
           <h1 class="mahjong-title">Mahjong Room</h1>
@@ -122,7 +122,7 @@
         <!-- Side controls -->
         <div class="side-panel">
           <!-- Admin / Dealer Controls -->
-          <div class="test-controls" v-if="showRoomControls">
+          <div class="test-controls room-controls" v-if="showRoomControls">
             <h2 class="panel-title">Room Controls</h2>
             <p class="panel-subtitle">
               Players: {{ gameState?.players.length || 0 }}/4
@@ -151,7 +151,7 @@
             </button>
           </div>
 
-          <div class="test-controls" v-if="isAdminUser">
+          <div class="test-controls admin-controls" v-if="isAdminUser">
             <h2 class="panel-title">Admin Debug</h2>
             <p class="panel-subtitle">Game Phase: {{ gameState?.phase }}</p>
             <p class="panel-subtitle">Players: {{ gameState?.players.length }}</p>
@@ -190,7 +190,11 @@
             </div>
           </div>
 
-          <div class="test-controls" v-if="isConnected">
+          <div
+            class="test-controls action-controls"
+            :class="{ 'action-controls--priority': hasPriorityActions || showPass }"
+            v-if="isConnected"
+          >
             <h2 class="panel-title">Game Actions</h2>
             
             <div v-if="showPeng">
@@ -246,7 +250,7 @@
               <p class="panel-subtitle">Waiting for others...</p>
             </div>
           </div>
-          <div class="test-controls" v-else>
+          <div class="test-controls connection-controls" v-else>
              <p class="panel-subtitle">Connecting...</p>
              <p v-if="error" class="panel-subtitle" style="color: red">{{ error }}</p>
           </div>
@@ -292,25 +296,11 @@ const showAllCards = ref(false)
 const shouldRevealOpponents = computed(
   () => Boolean(gameState.value?.teachingMode) || (isAdminUser.value && showAllCards.value)
 )
-const isMobilePortrait = ref(false)
-const shouldRotateView = computed(() => isMobilePortrait.value)
-
 watch(isAdminUser, (next) => {
   if (!next && showAllCards.value) {
     showAllCards.value = false
   }
 })
-
-const evaluateViewport = () => {
-  if (!process.client) {
-    return
-  }
-
-  const { innerWidth: width, innerHeight: height } = window
-  const smallestSide = Math.min(width, height)
-  const isPortrait = height >= width
-  isMobilePortrait.value = isPortrait && smallestSide <= 768
-}
 
 const toggleShowAllCards = () => {
   if (!isAdminUser.value) return
@@ -322,20 +312,11 @@ onMounted(() => {
     connect(roomId.value, playerId.value)
   }
 
-  if (process.client) {
-    evaluateViewport()
-    window.addEventListener('resize', evaluateViewport)
-    window.addEventListener('orientationchange', evaluateViewport)
-  }
 })
 
 onUnmounted(() => {
   disconnect()
 
-  if (process.client) {
-    window.removeEventListener('resize', evaluateViewport)
-    window.removeEventListener('orientationchange', evaluateViewport)
-  }
 })
 
 // ---- Computed Players ----
@@ -546,7 +527,7 @@ const hasPriorityActions = computed(
     showConcealedKong.value ||
     showExtendedKong.value
 )
-const showMobileActionNotice = computed(() => shouldRotateView.value && hasPriorityActions.value)
+const showMobileActionNotice = computed(() => hasPriorityActions.value || showPass.value)
 
 const onConcealedKong = () => {
   // We need to know which tiles to kong. 
@@ -624,28 +605,25 @@ const forceDiscard = async (p: Player) => {
 <style scoped>
 .mahjong-page {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
   background: radial-gradient(circle at top, #153b2f, #07130e);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   color: #f5f5f5;
-  padding: 16px;
+  padding:
+    max(12px, env(safe-area-inset-top))
+    max(12px, env(safe-area-inset-right))
+    max(12px, env(safe-area-inset-bottom))
+    max(12px, env(safe-area-inset-left));
+  overflow-x: hidden;
 }
 
 .room-viewport {
   width: 100%;
   display: flex;
   justify-content: center;
-}
-
-.room-container--rotated {
-  max-width: none;
-}
-
-.room-container--rotated {
-  display: flex;
-  flex-direction: column;
 }
 
 .room-container {
@@ -714,8 +692,8 @@ const forceDiscard = async (p: Player) => {
 
 .mahjong-table {
   position: relative;
-  width: min(80vw, 900px);
-  max-height: 80vh;
+  width: min(100%, 900px);
+  max-height: calc(100dvh - 120px);
   aspect-ratio: 4 / 3;
   border-radius: 20px;
   background: radial-gradient(circle at center, #1a5c3e, #0c3421);
@@ -924,6 +902,10 @@ const forceDiscard = async (p: Player) => {
 }
 
 @media (max-width: 900px) {
+  .mahjong-page {
+    align-items: flex-start;
+  }
+
   .room-main {
     gap: 8px;
   }
@@ -935,13 +917,21 @@ const forceDiscard = async (p: Player) => {
 }
 
 @media (max-width: 768px) {
+  .mahjong-page {
+    padding:
+      max(8px, env(safe-area-inset-top))
+      max(8px, env(safe-area-inset-right))
+      max(8px, env(safe-area-inset-bottom))
+      max(8px, env(safe-area-inset-left));
+  }
+
   .room-container {
-    padding: 12px;
+    padding: 10px;
+    border-radius: 14px;
   }
 
   .room-header {
-    flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
   }
 
   .mahjong-title {
@@ -950,6 +940,7 @@ const forceDiscard = async (p: Player) => {
 
   .mahjong-subtitle {
     font-size: 0.8rem;
+    line-height: 1.35;
   }
 
   .mahjong-table {
@@ -959,13 +950,13 @@ const forceDiscard = async (p: Player) => {
   }
 
   .side-panel {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 12px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
   }
 
   .test-controls {
-    flex: 1 1 220px;
+    min-width: 0;
   }
 
   .panel-title {
@@ -978,60 +969,148 @@ const forceDiscard = async (p: Player) => {
 }
 
 @media (max-width: 600px) {
+  .room-header {
+    gap: 8px;
+  }
+
+  .room-info {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .mahjong-title {
+    font-size: 1.05rem;
+  }
+
+  .mahjong-subtitle {
+    overflow-wrap: anywhere;
+  }
+
+  .teaching-badge {
+    margin: 3px 0 0;
+  }
+
   .mahjong-table {
     border-width: 2px;
+    aspect-ratio: 4 / 5;
+    min-height: min(122vw, 560px);
+    max-height: 72dvh;
+    border-radius: 14px;
+    padding: 6px;
   }
 
   .mahjong-button {
-    font-size: 0.75rem;
-    padding: 6px 10px;
+    min-height: 44px;
+    font-size: 0.78rem;
+    padding: 8px 12px;
   }
 
-  .test-controls {
-    flex: 1 1 100%;
+  .side-panel {
+    grid-template-columns: 1fr;
+    padding-bottom: env(safe-area-inset-bottom);
   }
 
   .panel-button {
-    font-size: 0.75rem;
+    font-size: 0.78rem;
+  }
+
+  .table-center {
+    width: 48%;
+  }
+
+  .status {
+    font-size: 0.92rem;
+    margin-bottom: 3px;
+  }
+
+  .hint {
+    font-size: 0.66rem;
+    line-height: 1.25;
+  }
+
+  .mobile-scroll-notice {
+    padding: 4px 8px;
+    font-size: 0.62rem;
+  }
+
+  .seat-top {
+    top: 1.5%;
+    width: 82%;
+  }
+
+  .seat-bottom {
+    bottom: 1%;
+    width: 97%;
+  }
+
+  .seat-left,
+  .seat-right {
+    width: 20%;
+  }
+
+  .seat-left {
+    left: 0.5%;
+  }
+
+  .seat-right {
+    right: 0.5%;
+  }
+
+  .action-controls--priority {
+    position: fixed;
+    z-index: 30;
+    right: max(8px, env(safe-area-inset-right));
+    bottom: max(8px, env(safe-area-inset-bottom));
+    left: max(8px, env(safe-area-inset-left));
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow: 0 16px 38px rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(12px);
+  }
+
+  .action-controls--priority .panel-title,
+  .action-controls--priority .panel-subtitle {
+    grid-column: 1 / -1;
+    margin-bottom: 0;
+  }
+
+  .action-controls--priority > div {
+    min-width: 0;
+  }
+
+  .action-controls--priority .panel-button {
+    margin: 0;
   }
 }
 
-@media (max-width: 768px) and (orientation: portrait) {
-  .mobile-portrait {
-    min-height: 100vw;
+@media (max-width: 899px) and (orientation: landscape) {
+  .room-container {
+    padding: 8px 10px;
   }
 
-  .room-viewport--rotated {
-    width: 100vh;
-    height: 100vw;
-    align-items: center;
-    overflow: hidden;
+  .room-header {
+    min-height: 42px;
   }
 
-  .room-container--rotated {
-    transform: rotate(90deg);
-    transform-origin: center;
-    width: min(900px, 90vh);
-    max-height: calc(100vw - 24px);
+  .room-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(180px, 28vw);
+    align-items: start;
   }
 
-  .room-container--rotated .room-header {
-    order: 2;
-    margin-top: 12px;
+  .mahjong-table {
+    max-height: calc(100dvh - 76px);
+    width: auto;
+    max-width: 100%;
   }
 
-  .room-container--rotated .room-main {
-    order: 1;
-    flex-direction: column;
-  }
-
-  .room-container--rotated .table-wrapper {
-    order: 1;
-  }
-
-  .room-container--rotated .side-panel {
-    order: 2;
-    width: 100%;
+  .side-panel {
+    display: flex;
+    max-height: calc(100dvh - 76px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 }
 
