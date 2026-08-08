@@ -20,7 +20,9 @@ export default defineEventHandler(async (event) => {
   const session = await AuthService.createSession(user.userId)
   const maxAge = 60 * 60 * 24 * 7
   const sharedCookieOptions = {
-    secure: process.env.NODE_ENV === 'production',
+    secure:
+      process.env.NODE_ENV === 'production' &&
+      process.env.COOKIE_SECURE !== 'false',
     sameSite: 'lax' as const,
     maxAge,
     path: '/'

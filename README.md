@@ -64,6 +64,8 @@ Create `.env` with your credentials:
 MONGODB_URI=mongodb://localhost:27017
 MONGODB_DB=blood_on_mahjong
 REDIS_URL=redis://localhost:6379
+# Only for temporary HTTP deployments without TLS; omit this when using HTTPS.
+COOKIE_SECURE=false
 ```
 
 Open the login page and enter a 2–32 character ID containing letters, numbers,
