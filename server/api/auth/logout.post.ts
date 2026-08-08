@@ -10,8 +10,11 @@ export default defineEventHandler(async (event) => {
     await AuthService.deleteSession(token);
   }
 
-  // Clear cookie
-  deleteCookie(event, 'mahjong_session');
+  deleteCookie(event, 'mahjong_session', { path: '/' });
+  deleteCookie(event, 'user_id', { path: '/' });
+  deleteCookie(event, 'user_name', { path: '/' });
+  deleteCookie(event, 'is_admin', { path: '/' });
+  deleteCookie(event, 'auth_token', { path: '/' });
 
   return {
     success: true,

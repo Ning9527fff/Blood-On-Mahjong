@@ -21,7 +21,6 @@ export class UserService {
       email: data.email,
       name: data.name,
       avatar: data.avatar,
-      oauthProvider: 'local',
       isAdmin: data.isAdmin ?? false,
       createdAt: new Date(),
       lastLoginAt: new Date(),
@@ -46,66 +45,39 @@ export class UserService {
     return await collection.find({}).sort({ createdAt: 1 }).toArray()
   }
 
-  static async getUsersByProvider(provider: User['oauthProvider']): Promise<User[]> {
-    const collection = await getCollection<User>(this.COLLECTION_NAME)
-    return await collection.find({ oauthProvider: provider }).sort({ createdAt: 1 }).toArray()
-  }
-
   /**
-   * Create or update user from Google OAuth
+   * Find an existing local identity or create it on first login.
    */
-  static async upsertGoogleUser(profile: {
-    googleId: string;
-    email: string;
-    name: string;
-    avatar?: string;
-  }): Promise<User> {
+  static async loginWithId(userId: string): Promise<User> {
     const collection = await getCollection<User>(this.COLLECTION_NAME);
-    
-    // Check if user exists
-    const existingUser = await collection.findOne({ 
-      oauthProvider: 'google',
-      oauthId: profile.googleId 
-    });
-
-    if (existingUser) {
-      // Update last login and profile
-      await collection.updateOne(
-        { userId: existingUser.userId },
-        { 
-          $set: { 
-            lastLoginAt: new Date(),
-            name: profile.name,
-            avatar: profile.avatar,
-            email: profile.email
-          } 
+    const now = new Date();
+    const user = await collection.findOneAndUpdate(
+      { userId },
+      {
+        $set: { lastLoginAt: now },
+        $setOnInsert: {
+          userId,
+          email: `${userId}@local.invalid`,
+          name: userId,
+          isAdmin: false,
+          createdAt: now,
+          stats: {
+            gamesPlayed: 0,
+            gamesWon: 0,
+            totalScore: 0,
+            highestFan: 0,
+            winRate: 0
+          }
         }
-      );
-      return { ...existingUser, lastLoginAt: new Date() };
+      },
+      { upsert: true, returnDocument: 'after' }
+    );
+
+    if (!user) {
+      throw new Error('Failed to create or load user');
     }
 
-    // Create new user
-    const newUser: User = {
-      userId: randomUUID(),
-      email: profile.email,
-      name: profile.name,
-      avatar: profile.avatar,
-      oauthProvider: 'google',
-      oauthId: profile.googleId,
-      isAdmin: false,
-      createdAt: new Date(),
-      lastLoginAt: new Date(),
-      stats: {
-        gamesPlayed: 0,
-        gamesWon: 0,
-        totalScore: 0,
-        highestFan: 0,
-        winRate: 0
-      }
-    };
-
-    await collection.insertOne(newUser);
-    return newUser;
+    return user;
   }
 
   /**

@@ -1,5 +1,6 @@
 import { gameManager } from '../../utils/gameManager';
 import { emitToRoom } from '../../utils/socket';
+import { isAdminFromEvent, resolveUserFromEvent } from '../../utils/session';
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
@@ -10,6 +11,11 @@ export default defineEventHandler(async (event) => {
       statusCode: 400,
       message: 'Game ID and player ID are required'
     });
+  }
+
+  const sessionUser = await resolveUserFromEvent(event);
+  if (sessionUser.userId !== playerId && !(await isAdminFromEvent(event))) {
+    throw createError({ statusCode: 403, message: 'Player identity does not match the session' });
   }
 
   const game = await gameManager.getGame(gameId);

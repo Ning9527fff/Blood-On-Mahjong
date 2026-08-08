@@ -1,6 +1,5 @@
 import { getCollection } from '../utils/mongo';
 import type { Session } from '../types/database';
-import { UserService } from './userService';
 import { randomUUID } from 'crypto';
 
 export class AuthService {
@@ -62,26 +61,4 @@ export class AuthService {
     return result.deletedCount;
   }
 
-  /**
-   * Handle Google OAuth callback
-   */
-  static async handleGoogleAuth(googleProfile: {
-    id: string;
-    email: string;
-    name: string;
-    picture?: string;
-  }): Promise<{ user: any; session: { sessionId: string; token: string } }> {
-    // Upsert user from Google profile
-    const user = await UserService.upsertGoogleUser({
-      googleId: googleProfile.id,
-      email: googleProfile.email,
-      name: googleProfile.name,
-      avatar: googleProfile.picture
-    });
-
-    // Create session
-    const session = await this.createSession(user.userId);
-
-    return { user, session };
-  }
 }

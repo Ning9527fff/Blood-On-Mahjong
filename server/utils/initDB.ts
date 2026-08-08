@@ -26,7 +26,6 @@ export async function initializeDatabase() {
     const usersCollection = db.collection('users');
     await usersCollection.createIndex({ userId: 1 }, { unique: true });
     await usersCollection.createIndex({ email: 1 }, { unique: true });
-    await usersCollection.createIndex({ oauthId: 1 }, { sparse: true });
     await usersCollection.createIndex({ 'stats.totalScore': -1 });
     console.log('✓ Created indexes for users collection');
 

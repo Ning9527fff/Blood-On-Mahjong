@@ -3,10 +3,10 @@ export default defineNuxtRouteMiddleware((to, from) => {
   // Allow login page without auth
   if (to.path === '/login') return
 
-  const token = useCookie('auth_token').value
+  const userId = useCookie('user_id').value
 
   // Not logged in → redirect to login
-  if (!token) {
+  if (!userId) {
     return navigateTo('/login')
   }
 })

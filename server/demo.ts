@@ -11,17 +11,17 @@ async function demo() {
 
   // Create a game
   console.log('1. Creating game...');
-  const { gameId, playerId: p1 } = await gameManager.createGame('Alice');
+  const { gameId, playerId: p1 } = await gameManager.createGame('alice', 'Alice');
   console.log(`   Game created: ${gameId}`);
   console.log(`   Player 1 (Alice): ${p1}\n`);
 
   // Join 3 more players
   console.log('2. Players joining...');
-  const { playerId: p2 } = await gameManager.joinGame(gameId, 'Bob');
+  const { playerId: p2 } = await gameManager.joinGame(gameId, 'bob', 'Bob');
   console.log(`   Player 2 (Bob): ${p2}`);
-  const { playerId: p3 } = await gameManager.joinGame(gameId, 'Carol');
+  const { playerId: p3 } = await gameManager.joinGame(gameId, 'carol', 'Carol');
   console.log(`   Player 3 (Carol): ${p3}`);
-  const { playerId: p4 } = await gameManager.joinGame(gameId, 'Dave');
+  const { playerId: p4 } = await gameManager.joinGame(gameId, 'dave', 'Dave');
   console.log(`   Player 4 (Dave): ${p4}`);
   console.log('   Game auto-started!\n');
 

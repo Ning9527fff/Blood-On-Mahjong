@@ -83,11 +83,10 @@ class GameManager {
   /**
    * Create a new game
    */
-  async createGame(playerName: string): Promise<{ gameId: string; playerId: string }> {
+  async createGame(playerId: string, playerName: string): Promise<{ gameId: string; playerId: string }> {
     await this.hydrateFromDatabase();
 
     const gameId = randomUUID();
-    const playerId = randomUUID();
 
     const player: Player = {
       id: playerId,
@@ -142,7 +141,7 @@ class GameManager {
   /**
    * Join an existing game
    */
-  async joinGame(gameId: string, playerName: string): Promise<{ playerId: string; position: number }> {
+  async joinGame(gameId: string, playerId: string, playerName: string): Promise<{ playerId: string; position: number }> {
     await this.hydrateFromDatabase();
 
     const game = await this.ensureGameLoaded(gameId);
@@ -154,11 +153,15 @@ class GameManager {
       throw new Error('Game already started');
     }
 
+    const existingPlayer = game.players.find(player => player.id === playerId);
+    if (existingPlayer) {
+      return { playerId, position: existingPlayer.position };
+    }
+
     if (game.players.length >= 4) {
       throw new Error('Game is full');
     }
 
-    const playerId = randomUUID();
     const position = game.players.length;
 
     const player: Player = {

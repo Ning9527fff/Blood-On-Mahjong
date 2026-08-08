@@ -30,7 +30,6 @@ export default defineEventHandler(async (event) => {
         email: user.email,
         name: user.name,
         avatar: user.avatar,
-        oauthProvider: user.oauthProvider,
         createdAt: user.createdAt,
         lastLoginAt: user.lastLoginAt,
         stats: user.stats

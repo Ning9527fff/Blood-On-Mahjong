@@ -1,6 +1,6 @@
 # Blood on Mahjong
 
-A real-time multiplayer Sichuan Mahjong (血战到底) web application with WebSocket-based gameplay, Google OAuth authentication, and Kubernetes deployment.
+A real-time multiplayer Sichuan Mahjong (血战到底) web application with WebSocket-based gameplay, lightweight user-ID sessions, and Kubernetes deployment.
 
 ---
 
@@ -16,7 +16,7 @@ A real-time multiplayer Sichuan Mahjong (血战到底) web application with WebS
 
 - **Real-Time Multiplayer** — WebSocket (Socket.IO) with Redis adapter for horizontal scaling across multiple server instances
 - **Sichuan Mahjong Rules** — Full implementation of 血战到底 (Blood Fight) variant including Kong scoring, missing-suit declaration, and multi-winner support
-- **Authentication** — Google OAuth 2.0 with session management; mock login for development/testing
+- **Authentication** — Enter a user ID to create or resume a local identity with a seven-day server session
 - **Game State Persistence** — MongoDB-backed game state with automatic hydration on server restart
 - **Match History** — Persistent game records with player scores, win/loss tracking, and round details
 - **Room Management** — Create, join, and spectate game rooms with real-time player count updates
@@ -33,7 +33,7 @@ A real-time multiplayer Sichuan Mahjong (血战到底) web application with WebS
 | **Backend** | Nuxt Server (Nitro), Socket.IO, Node.js |
 | **Database** | MongoDB Atlas |
 | **Cache / Pub-Sub** | Redis (Socket.IO adapter) |
-| **Auth** | Google OAuth 2.0, Session cookies |
+| **Auth** | User ID login, server-side session cookies |
 | **Infrastructure** | Docker, Kubernetes, Helm, Werf |
 | **CI/CD** | GitHub Actions, Playwright |
 
@@ -64,10 +64,11 @@ Create `.env` with your credentials:
 MONGODB_URI=mongodb://localhost:27017
 MONGODB_DB=blood_on_mahjong
 REDIS_URL=redis://localhost:6379
-GOOGLE_CLIENT_ID=your-client-id
-GOOGLE_CLIENT_SECRET=your-client-secret
-GOOGLE_REDIRECT_URI=http://localhost:3000/api/auth/google/callback
 ```
+
+Open the login page and enter a 2–32 character ID containing letters, numbers,
+underscores, or hyphens. New IDs are created automatically. This intentionally
+has no password, so anyone who knows an ID can use the same identity.
 
 ---
 

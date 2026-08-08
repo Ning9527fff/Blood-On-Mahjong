@@ -1,27 +1,17 @@
 import { gameManager } from '../../utils/gameManager';
+import { resolveUserFromEvent } from '../../utils/session';
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event);
-  const { playerName } = body;
-
-  if (!playerName || typeof playerName !== 'string') {
-    throw createError({
-      statusCode: 400,
-      message: 'Player name is required'
-    });
-  }
-
   try {
-    const result = await gameManager.createGame(playerName);
+    const user = await resolveUserFromEvent(event);
+    const result = await gameManager.createGame(user.userId, user.name);
     
     return {
       success: true,
       data: result
     };
   } catch (error: any) {
-    throw createError({
-      statusCode: 500,
-      message: error.message || 'Failed to create game'
-    });
+    if (error.statusCode) throw error;
+    throw createError({ statusCode: 500, message: error.message || 'Failed to create game' });
   }
 });

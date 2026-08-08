@@ -1,5 +1,5 @@
 import type { H3Event } from 'h3'
-import { createError, getCookie, getQuery } from 'h3'
+import { createError, getCookie } from 'h3'
 import { AuthService } from '../services/authService'
 import { UserService } from '../services/userService'
 
@@ -11,16 +11,6 @@ export async function resolveUserIdFromEvent(event: H3Event): Promise<string> {
     if (sessionUserId) {
       return sessionUserId
     }
-  }
-
-  const cookieUserId = getCookie(event, 'user_id')
-  if (cookieUserId) {
-    return cookieUserId
-  }
-
-  const query = getQuery(event)
-  if (typeof query.userId === 'string' && query.userId.length > 0) {
-    return query.userId
   }
 
   throw createError({

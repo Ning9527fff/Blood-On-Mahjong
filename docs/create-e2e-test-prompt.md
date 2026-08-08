@@ -4,7 +4,7 @@ use the baseURL as the main url to login, don't read my code, write the test onl
 
 I want you to create a simple e2e test, 
 
-First, login by clicking the Player 1 button to simulate a OAuth login, don't click the oauth button, click the mock player 1 button to mock a login, no password is needed
+First, enter `player_1` in the user ID field and submit the form. No password is needed.
 
 After login, you will see the word "Waiting for players to start" in the middle of the screen, and at the top left of the screen, you will see a room id listed as 血战到底 · Room #74ea2cea-f96f-4551-a44e-cf4af77b5d9e
 The string after # is the room id that is different for every game

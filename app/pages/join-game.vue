@@ -61,7 +61,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 
-const userName = useCookie('user_name')
 const waitingGames = ref<any[]>([])
 const waitingGamesError = ref<string | null>(null)
 const isWaitingLoading = ref(false)
@@ -114,7 +113,7 @@ const joinGame = async (gameId: string) => {
   try {
     const { data, error } = await useFetch('/api/game/join', {
       method: 'POST',
-      body: { gameId, playerName: userName.value || 'Player ' + Math.floor(Math.random() * 1000) }
+      body: { gameId }
     })
 
     if (error.value) {

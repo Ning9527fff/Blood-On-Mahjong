@@ -1,6 +1,6 @@
 import { gameManager } from '../../utils/gameManager';
 import { TileSuit } from '../../types/game';
-import { isAdminFromEvent } from '../../utils/session';
+import { isAdminFromEvent, resolveUserFromEvent } from '../../utils/session';
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event);
@@ -15,6 +15,12 @@ export default defineEventHandler(async (event) => {
 
   const normalizedGameId = gameId as string;
   const normalizedPlayerId = playerId as string;
+  const sessionUser = await resolveUserFromEvent(event);
+  const isAdminUser = await isAdminFromEvent(event);
+
+  if (sessionUser.userId !== normalizedPlayerId && !isAdminUser) {
+    throw createError({ statusCode: 403, message: 'Player identity does not match the session' });
+  }
 
   const game = await gameManager.getGame(normalizedGameId);
   
@@ -35,8 +41,6 @@ export default defineEventHandler(async (event) => {
   }
 
   const availableActions = await gameManager.getAvailableActions(normalizedGameId, normalizedPlayerId);
-
-  const isAdminUser = await isAdminFromEvent(event);
 
   const maskedPlayers = game.players.map((p) => {
     const shouldReveal = isAdminUser || p.id === normalizedPlayerId;

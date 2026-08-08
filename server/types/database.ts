@@ -10,8 +10,6 @@ export interface User {
   email: string;
   name: string;
   avatar?: string;
-  oauthProvider: 'google' | 'local'; // OAuth provider
-  oauthId?: string; // Google ID
   isAdmin: boolean;
   createdAt: Date;
   lastLoginAt: Date;
@@ -185,7 +183,7 @@ export interface MatchHistoryResult {
 }
 
 /**
- * Session Collection - For OAuth and session management
+ * Session Collection - For user-ID login and session management
  */
 export interface Session {
   _id?: ObjectId;

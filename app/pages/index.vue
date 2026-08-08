@@ -280,6 +280,7 @@ const saveProfile = async () => {
 
     if (response?.data) {
       profileResponse.value = response
+      userName.value = response.data.name
     } else {
       await refreshProfile()
     }
@@ -299,7 +300,6 @@ const startNewGame = async () => {
   try {
     const response = await $fetch('/api/game/create', {
       method: 'POST',
-      body: { playerName: userName.value || 'Player 1' },
       headers: { 'Cache-Control': 'no-cache' }
     })
 
@@ -319,10 +319,15 @@ const onJoinGame = () => navigateTo('/join-game')
 const onMatchHistory = () => router.push('/history')
 const goToAdminSandbox = () => navigateTo('/admin-test')
 
-const logout = () => {
-  const token = useCookie('auth_token')
-  token.value = null
-  return navigateTo('/login')
+const logout = async () => {
+  try {
+    await $fetch('/api/auth/logout', { method: 'POST' })
+  } finally {
+    useCookie('user_id').value = null
+    useCookie('user_name').value = null
+    useCookie('is_admin').value = null
+    await navigateTo('/login')
+  }
 }
 </script>
 

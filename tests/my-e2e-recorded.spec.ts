@@ -4,7 +4,8 @@ test('test', async ({ page }) => {
   await page.goto(`${process.env.BASE_URL ?? 'http://localhost:3000'}/login`);
   // Small delay to allow initial client-side hydration/render before interactions
   await page.waitForTimeout(500);
-  await page.getByRole('button', { name: 'Player 1' }).click();
+  await page.getByLabel('用户 ID').fill('player_1');
+  await page.getByRole('button', { name: '进入游戏' }).click();
   await page.waitForTimeout(500);
   await expect(page.getByRole('heading', { name: 'Waiting Room' })).toBeVisible();
   await page.getByRole('button', { name: 'New Game' }).click();
@@ -27,4 +28,5 @@ test('test', async ({ page }) => {
   await page.waitForTimeout(500);
   await page.getByRole('button', { name: 'Log Out' }).click();
   await page.waitForTimeout(500);
+  await expect(page.getByLabel('用户 ID')).toBeVisible();
 });

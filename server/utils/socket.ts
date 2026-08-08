@@ -47,18 +47,18 @@ async function socketIsAdmin(socket: Socket): Promise<boolean> {
     }
   }
 
-  if (cookies.user_id) {
-    const user = await UserService.getUserById(cookies.user_id)
-    if (user) {
-      return !!user.isAdmin
-    }
-  }
-
-  if (cookies.is_admin) {
-    return cookies.is_admin === 'true'
-  }
-
   return false
+}
+
+async function getSocketSessionUser(socket: Socket) {
+  const cookies = parseCookies(socket.handshake.headers.cookie)
+  const token = cookies.mahjong_session
+  if (!token) return null
+
+  const userId = await AuthService.validateSession(token)
+  if (!userId) return null
+
+  return await UserService.getUserById(userId)
 }
 
 // ✅ MongoDB Collections
@@ -108,6 +108,20 @@ export async function initializeSocketIO(server: HTTPServer) {
     console.warn('   Set REDIS_URL environment variable to enable scaling')
   }
 
+  io.use(async (socket, next) => {
+    try {
+      const user = await getSocketSessionUser(socket)
+      if (!user) {
+        next(new Error('Authentication required'))
+        return
+      }
+      socket.data.authUser = user
+      next()
+    } catch {
+      next(new Error('Authentication failed'))
+    }
+  })
+
   io.on('connection', (socket: Socket) => {
     console.log(`🔌 Client connected: ${socket.id}`)
 
@@ -127,19 +141,30 @@ export async function initializeSocketIO(server: HTTPServer) {
     // Handle user authentication
     socket.on('auth:login', async (data: { userId: string; userName: string }) => {
       try {
+        const sessionUser = socket.data.authUser
+        if (!sessionUser || sessionUser.userId !== data.userId) {
+          socket.emit('auth:error', { message: 'Invalid or expired session' })
+          return
+        }
+
         const collection = await getSocketConnectionsCollection()
         
         // Store connection in MongoDB
-        await collection.insertOne({
-          socketId: socket.id,
-          userId: data.userId,
-          userName: data.userName,
-          connectedAt: new Date(),
-          lastSeenAt: new Date()
-        })
+        await collection.updateOne(
+          { socketId: socket.id },
+          {
+            $set: {
+              userId: sessionUser.userId,
+              userName: sessionUser.name,
+              lastSeenAt: new Date()
+            },
+            $setOnInsert: { connectedAt: new Date() }
+          },
+          { upsert: true }
+        )
         
         socket.emit('auth:success', { socketId: socket.id })
-        console.log(`✅ User authenticated: ${data.userName} (${data.userId})`)
+        console.log(`✅ User authenticated: ${sessionUser.name} (${sessionUser.userId})`)
       } catch (error) {
         console.error('Error in auth:login:', error)
         socket.emit('auth:error', { message: 'Authentication failed' })
@@ -148,18 +173,20 @@ export async function initializeSocketIO(server: HTTPServer) {
 
     // Join a game room
     socket.on('room:join', async (data: { roomId: string; userId: string; userName: string }) => {
-      const { roomId, userId, userName } = data
-      console.log(
-        '[room:join]',
-        'PID:', process.pid,
-        'roomId:', roomId,
-        'user:', userName,
-        'socket:', socket.id
-      )
-      
+      const { roomId } = data
       try {
         const roomStates = await getRoomStatesCollection()
         const connections = await getSocketConnectionsCollection()
+        const sessionUser = socket.data.authUser
+        const userId = sessionUser.userId as string
+        const userName = sessionUser.name as string
+        console.log(
+          '[room:join]',
+          'PID:', process.pid,
+          'roomId:', roomId,
+          'user:', userName,
+          'socket:', socket.id
+        )
         
         // Get or create room state
         let roomState = await roomStates.findOne({ roomId })
@@ -210,10 +237,14 @@ export async function initializeSocketIO(server: HTTPServer) {
           { socketId: socket.id },
           { 
             $set: { 
+              userId,
+              userName,
               roomId,
               lastSeenAt: new Date() 
-            } 
-          }
+            },
+            $setOnInsert: { connectedAt: new Date() }
+          },
+          { upsert: true }
         )
 
         // Get updated room state
@@ -254,6 +285,12 @@ export async function initializeSocketIO(server: HTTPServer) {
     socket.on('game:action', async (data: any) => {
       try {
         const { gameId, playerId, type, tileId, tileIds } = data
+        const sessionUser = socket.data.authUser
+
+        if (!sessionUser || sessionUser.userId !== playerId) {
+          socket.emit('game:error', { message: 'Player identity does not match the session' })
+          return
+        }
         
         console.log(`🎮 Action received: ${type} from ${playerId} in game ${gameId}`)
 
