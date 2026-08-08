@@ -64,9 +64,25 @@ Create `.env` with your credentials:
 MONGODB_URI=mongodb://localhost:27017
 MONGODB_DB=blood_on_mahjong
 REDIS_URL=redis://localhost:6379
+DEEPSEEK_API_KEY=your-deepseek-api-key
+DEEPSEEK_MODEL=deepseek-chat
 # Only for temporary HTTP deployments without TLS; omit this when using HTTPS.
 COOKIE_SECURE=false
 ```
+
+Optional AI tuning:
+
+```env
+DEEPSEEK_BASE_URL=https://api.deepseek.com/chat/completions
+DEEPSEEK_TIMEOUT_MS=12000
+AI_ACTION_DELAY_MS=900
+```
+
+The room owner can add DeepSeek AI players while a room is waiting. Human and
+AI players together must fill all four seats before the game can start. The API
+key is read only by the server and must never be exposed through client-side
+runtime configuration. If DeepSeek is unavailable, AI players use a small local
+fallback policy so the round does not become stuck.
 
 Open the login page and enter a 2–32 character ID containing letters, numbers,
 underscores, or hyphens. New IDs are created automatically. This intentionally

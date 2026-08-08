@@ -15,11 +15,8 @@ FROM node:22-alpine AS production
 ENV NODE_ENV=production
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm ci --omit=dev
-
 COPY --from=build /app/.output ./.output
 
 EXPOSE 3000
 
-CMD ["npx", "nuxt", "start"]
+CMD ["node", ".output/server/index.mjs"]

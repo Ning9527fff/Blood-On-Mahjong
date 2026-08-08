@@ -114,9 +114,28 @@
         <!-- Side controls -->
         <div class="side-panel">
           <!-- Admin / Dealer Controls -->
-          <div class="test-controls" v-if="canStartGame">
+          <div class="test-controls" v-if="showRoomControls">
             <h2 class="panel-title">Room Controls</h2>
-            <button class="mahjong-button panel-button" @click="startGame" :disabled="isInteractionLocked">
+            <p class="panel-subtitle">
+              Players: {{ gameState?.players.length || 0 }}/4
+              · AI: {{ aiPlayerCount }}
+            </p>
+            <button
+              v-if="openSeatCount > 0"
+              class="mahjong-button panel-button ai-button"
+              @click="addAIPlayer"
+              :disabled="isInteractionLocked || isAddingAI"
+            >
+              {{ isAddingAI ? 'Adding AI…' : `Add DeepSeek AI (${openSeatCount} seats left)` }}
+            </button>
+            <p v-if="deepSeekConfigured === false" class="panel-subtitle ai-warning">
+              DeepSeek key is not configured yet. AI will use fallback decisions.
+            </p>
+            <button
+              class="mahjong-button panel-button"
+              @click="startGame"
+              :disabled="isInteractionLocked || isAddingAI || !canStartGame"
+            >
               Start Game ({{ gameState?.players.length }}/4 Players)
             </button>
           </div>
@@ -126,18 +145,6 @@
             <p class="panel-subtitle">Game Phase: {{ gameState?.phase }}</p>
             <p class="panel-subtitle">Players: {{ gameState?.players.length }}</p>
             
-            <!-- Setup Test Game -->
-            <div v-if="gameState?.phase === 'waiting'">
-              <button 
-                class="mahjong-button panel-button" 
-                @click="setupTestGame"
-                v-if="(gameState?.players.length || 0) < 4"
-                :disabled="isInteractionLocked"
-              >
-                Add Bots & Start
-              </button>
-            </div>
-
             <!-- Manual Refresh -->
             <button class="mahjong-button panel-button small" @click="refreshState" :disabled="isInteractionLocked">
               Force Refresh State
@@ -259,8 +266,11 @@ const {
   connect, 
   disconnect, 
   executeAction,
+  addAIPlayer,
   startGame,
   refreshState,
+  isAddingAI,
+  deepSeekConfigured,
   roomDismissedReason
 } = useGame()
 
@@ -414,18 +424,18 @@ const playerResults = computed(() => {
       return a.name.localeCompare(b.name)
     })
 })
-const canStartGame = computed(() => {
-  // Debug log to see why button might not show
-  console.log('canStartGame check:', {
-    isDealer: isDealer.value,
-    phase: gameState.value?.phase,
-    playerCount: gameState.value?.players.length
-  })
-  
-  return isDealer.value && 
-         gameState.value?.phase === 'waiting' && 
-         (gameState.value?.players.length || 0) >= 2
-})
+const showRoomControls = computed(
+  () => isDealer.value && gameState.value?.phase === GamePhase.WAITING
+)
+const aiPlayerCount = computed(
+  () => gameState.value?.players.filter(player => player.isAI).length ?? 0
+)
+const openSeatCount = computed(
+  () => Math.max(0, 4 - (gameState.value?.players.length ?? 0))
+)
+const canStartGame = computed(
+  () => showRoomControls.value && gameState.value?.players.length === 4
+)
 
 // ---- Other Players State ----
 const northHand = computed(() => topPlayer.value?.hand.concealedTiles || []) // Will be empty/hidden by backend usually
@@ -570,30 +580,6 @@ const otherPlayers = computed(() => {
   if (!gameState.value || !currentPlayer.value) return []
   return gameState.value.players.filter(p => p.id !== currentPlayer.value!.id)
 })
-
-const setupTestGame = async () => {
-  if (!roomId.value) return
-  
-  // Join 3 bots
-  // We need to know how many players are currently in
-  const currentCount = gameState.value?.players.length || 1
-  
-  for (let i = currentCount + 1; i <= 4; i++) {
-    await useFetch('/api/game/join', {
-      method: 'POST',
-      body: { gameId: roomId.value, playerName: `Bot ${i}` }
-    })
-  }
-  
-  // Refresh to see them
-  await refreshState()
-  
-  // Start Game
-  await startGame()
-  
-  // Refresh again
-  await refreshState()
-}
 
 const forceDiscard = async (p: Player) => {
   if (!roomId.value || !p.hand.concealedTiles.length) {
@@ -868,6 +854,16 @@ const forceDiscard = async (p: Player) => {
 
 .panel-button.danger:hover {
   background: rgba(160, 38, 38, 1);
+}
+
+.panel-button.ai-button {
+  background: linear-gradient(135deg, #4b65d9, #8c78ff);
+  color: #ffffff;
+}
+
+.ai-warning {
+  color: #ffd889;
+  line-height: 1.35;
 }
 
 .game-over-overlay {

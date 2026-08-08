@@ -47,6 +47,7 @@ const storedToMeld = (meld: StoredMeld): Meld => ({
 const playerToStored = (player: Player): GamePlayer => ({
   userId: player.id,
   name: player.name,
+  isAI: player.isAI,
   position: player.position,
   hand: {
     concealedTiles: player.hand.concealedTiles.map(tileToStored),
@@ -69,6 +70,7 @@ const playerToStored = (player: Player): GamePlayer => ({
 const storedToPlayer = (player: GamePlayer): Player => ({
   id: player.userId,
   name: player.name,
+  isAI: player.isAI ?? false,
   position: player.position,
   hand: {
     concealedTiles: player.hand.concealedTiles.map(storedToTile),

@@ -91,6 +91,7 @@ class GameManager {
     const player: Player = {
       id: playerId,
       name: playerName,
+      isAI: false,
       position: 0,
       hand: {
         concealedTiles: [],
@@ -167,6 +168,7 @@ class GameManager {
     const player: Player = {
       id: playerId,
       name: playerName,
+      isAI: false,
       position,
       hand: {
         concealedTiles: [],
@@ -202,6 +204,58 @@ class GameManager {
   }
 
   /**
+   * Add one server-controlled AI player to a waiting game.
+   */
+  async addAIPlayer(gameId: string): Promise<Player> {
+    await this.hydrateFromDatabase();
+
+    const game = await this.ensureGameLoaded(gameId);
+    if (!game) {
+      throw new Error('Game not found');
+    }
+
+    if (game.phase !== GamePhase.WAITING) {
+      throw new Error('AI players can only be added before the game starts');
+    }
+
+    if (game.players.length >= 4) {
+      throw new Error('Game is full');
+    }
+
+    const position = game.players.length;
+    const aiNumber = game.players.filter(player => player.isAI).length + 1;
+    const player: Player = {
+      id: `ai-${randomUUID()}`,
+      name: `DeepSeek AI ${aiNumber}`,
+      isAI: true,
+      position,
+      hand: {
+        concealedTiles: [],
+        exposedMelds: [],
+        discardedTiles: []
+      },
+      status: PlayerStatus.WAITING,
+      isDealer: false,
+      isTing: false,
+      missingSuit: null,
+      windScore: 0,
+      rainScore: 0,
+      wonFan: 0,
+      winOrder: null,
+      winRound: null,
+      winTimestamp: null,
+      score: 0
+    };
+
+    game.players.push(player);
+    this.playerToGame.set(player.id, gameId);
+    await this.persistGame(game);
+    this.broadcastGameState(gameId);
+
+    return player;
+  }
+
+  /**
    * Start the game
    */
   public async startGame(gameId: string): Promise<void> {
@@ -210,8 +264,8 @@ class GameManager {
     const game = await this.ensureGameLoaded(gameId);
     if (!game) return;
 
-    if (game.players.length < 2) {
-      throw new Error('Need at least 2 players to start');
+    if (game.players.length !== 4) {
+      throw new Error('Exactly 4 players are required to start');
     }
 
     game.phase = GamePhase.STARTING;
@@ -354,6 +408,13 @@ class GameManager {
     const player = game.players.find(p => p.id === playerId);
     if (!player) throw new Error('Player not found');
 
+    if (action !== ActionType.CHEAT_HU) {
+      const availableActions = await this.getAvailableActions(gameId, playerId);
+      if (!availableActions.includes(action)) {
+        throw new Error(`Action ${action} is not currently available`);
+      }
+    }
+
     const gameAction: GameAction = {
       playerId,
       type: action,
@@ -362,8 +423,8 @@ class GameManager {
 
     switch (action) {
       case ActionType.DISCARD:
-        this.handleDiscard(game, player, tileId!);
         gameAction.tile = findTileById(player.hand.concealedTiles, tileId!);
+        this.handleDiscard(game, player, tileId!);
         break;
 
       case ActionType.DRAW:

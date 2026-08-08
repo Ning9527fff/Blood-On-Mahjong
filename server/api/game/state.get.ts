@@ -1,6 +1,7 @@
 import { gameManager } from '../../utils/gameManager';
 import { TileSuit } from '../../types/game';
 import { isAdminFromEvent, resolveUserFromEvent } from '../../utils/session';
+import { aiPlayerController } from '../../services/aiPlayerController';
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event);
@@ -62,6 +63,7 @@ export default defineEventHandler(async (event) => {
 
   // Ensure isDealer is correctly passed
   const isDealer = player.isDealer;
+  aiPlayerController.queue(normalizedGameId);
 
   return {
     success: true,

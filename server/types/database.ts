@@ -76,6 +76,7 @@ export interface MahjongGame {
 export interface GamePlayer {
   userId: string;
   name: string;
+  isAI?: boolean;
   position: number; // 0-3
   hand: {
     concealedTiles: StoredTile[];

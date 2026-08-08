@@ -9,6 +9,7 @@ import { gameManager } from './gameManager'
 import { ActionType, GameEndReason } from '../types/game'
 import { AuthService } from '../services/authService'
 import { UserService } from '../services/userService'
+import { aiPlayerController } from '../services/aiPlayerController'
 
 let io: SocketIOServer | null = null
 
@@ -305,6 +306,7 @@ export async function initializeSocketIO(server: HTTPServer) {
         // Execute action in GameManager (the brain)
         // This will validate the move, update state, and trigger broadcast via setWebSocketManager
         await gameManager.executeAction(gameId, playerId, type, tileId, tileIds)
+        aiPlayerController.queue(gameId)
         
       } catch (error: any) {
         console.error('Error in game:action:', error.message)

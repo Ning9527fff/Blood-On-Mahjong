@@ -11,6 +11,8 @@ export const useGame = () => {
   const isConnected = ref(false)
   const error = ref<string | null>(null)
   const isActionPending = ref(false)
+  const isAddingAI = ref(false)
+  const deepSeekConfigured = ref<boolean | null>(null)
   const roomDismissedReason = ref<string | null>(null)
 
   const currentPlayer = computed(() => {
@@ -147,50 +149,50 @@ export const useGame = () => {
     if (isActionPending.value) return
     isActionPending.value = true
 
-    // Optimistic update or just send to server
-    // We can use socket to send action for faster response
-    if (socket.value && isConnected.value) {
-      socket.value.emit('game:action', {
-        gameId: gameId.value,
-        playerId: playerId.value,
-        type: action,
-        tileId,
-        tileIds
-      })
-    }
-
-    // Also call API as backup or primary (depending on backend logic)
-    // Since socket.ts seems to just broadcast, we might still need the API 
-    // to actually update the game state in GameManager.
-    // However, the user asked to use socket.ts functions.
-    // If socket.ts only broadcasts, it doesn't update state.
-    // So we MUST call the API to update state, and let the API (or socket) broadcast the update.
-    
     try {
-      const { data, error: apiError } = await useFetch('/api/game/action', {
+      const response = await $fetch<any>('/api/game/action', {
         method: 'POST',
         body: {
           gameId: gameId.value,
           playerId: playerId.value,
-          type: action,
+          action,
           tileId,
           tileIds
         }
       })
 
-      if (apiError.value) {
-        console.error('Action failed:', apiError.value)
-        return
-      }
-
-      if (data.value?.success) {
-        updateState(data.value.data)
+      if (response?.success) {
+        updateState(response.data)
         await refreshState()
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error('Error executing action:', e)
+      error.value = e?.data?.message || e?.message || 'Action failed'
     } finally {
       isActionPending.value = false
+    }
+  }
+
+  const addAIPlayer = async () => {
+    if (!gameId.value || isAddingAI.value) return
+    isAddingAI.value = true
+    error.value = null
+
+    try {
+      const response = await $fetch<any>('/api/game/ai-player', {
+        method: 'POST',
+        body: { gameId: gameId.value }
+      })
+
+      if (response?.success) {
+        deepSeekConfigured.value = response.data.deepSeekConfigured
+        await refreshState()
+      }
+    } catch (e: any) {
+      console.error('Failed to add AI player:', e)
+      error.value = e?.data?.message || e?.message || 'Failed to add AI player'
+    } finally {
+      isAddingAI.value = false
     }
   }
 
@@ -222,9 +224,12 @@ export const useGame = () => {
     connect,
     disconnect,
     executeAction,
+    addAIPlayer,
     startGame,
     refreshState,
     isActionPending,
+    isAddingAI,
+    deepSeekConfigured,
     roomDismissedReason
   }
 }

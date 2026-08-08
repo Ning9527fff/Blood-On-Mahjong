@@ -1,6 +1,7 @@
 import { gameManager } from '../../utils/gameManager';
 import { emitToRoom } from '../../utils/socket';
 import { isAdminFromEvent, resolveUserFromEvent } from '../../utils/session';
+import { aiPlayerController } from '../../services/aiPlayerController';
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
@@ -49,6 +50,7 @@ export default defineEventHandler(async (event) => {
       phase: 'playing',
       source: 'start'
     });
+    aiPlayerController.queue(gameId);
     
     return {
       success: true,

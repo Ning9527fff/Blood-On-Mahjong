@@ -44,6 +44,7 @@ export enum PlayerStatus {
 export interface Player {
   id: string;
   name: string;
+  isAI?: boolean;
   position: number; // 0-3
   hand: PlayerHand;
   status: PlayerStatus;

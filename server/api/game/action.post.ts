@@ -2,6 +2,7 @@ import { gameManager } from '../../utils/gameManager';
 import { ActionType } from '../../types/game';
 import { emitToRoom } from '../../utils/socket';
 import { isAdminFromEvent, requireAdminUser, resolveUserFromEvent } from '../../utils/session';
+import { aiPlayerController } from '../../services/aiPlayerController';
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
@@ -61,6 +62,7 @@ export default defineEventHandler(async (event) => {
         tileId
       }
     });
+    aiPlayerController.queue(gameId);
 
     const availableActions = await gameManager.getAvailableActions(gameId, playerId);
 
