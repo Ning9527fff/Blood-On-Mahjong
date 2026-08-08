@@ -3,12 +3,17 @@ import { resolveUserFromEvent } from '../../utils/session';
 
 export default defineEventHandler(async (event) => {
   try {
+    const body = await readBody<{ teachingMode?: unknown }>(event).catch(() => ({}));
     const user = await resolveUserFromEvent(event);
-    const result = await gameManager.createGame(user.userId, user.name);
+    const teachingMode = body?.teachingMode === true;
+    const result = await gameManager.createGame(user.userId, user.name, teachingMode);
     
     return {
       success: true,
-      data: result
+      data: {
+        ...result,
+        teachingMode
+      }
     };
   } catch (error: any) {
     if (error.statusCode) throw error;

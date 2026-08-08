@@ -12,9 +12,9 @@
         <button
           class="mahjong-button primary"
           :disabled="isCreatingGame"
-          @click="startNewGame"
+          @click="openCreateGameModal"
         >
-          New Game
+          {{ isCreatingGame ? 'Creating…' : 'New Game' }}
         </button>
 
         <button
@@ -43,9 +43,41 @@
       </div>
 
       <p class="mahjong-hint">
-        New Game will temporarily send you to room <strong>#66666</strong>.
+        Create a standard table or a teaching table with every hand visible.
       </p>
     </div>
+
+    <UModal
+      v-model:open="isCreateGameModalOpen"
+      title="Create a Game"
+      description="Choose the visibility rule for this room."
+    >
+      <template #body>
+        <div class="create-mode-options">
+          <button
+            class="create-mode-card"
+            :disabled="isCreatingGame"
+            @click="startNewGame(false)"
+          >
+            <span class="create-mode-title">Standard Mode</span>
+            <span class="create-mode-description">
+              Opponents' concealed tiles stay hidden.
+            </span>
+          </button>
+
+          <button
+            class="create-mode-card teaching"
+            :disabled="isCreatingGame"
+            @click="startNewGame(true)"
+          >
+            <span class="create-mode-title">Teaching Mode</span>
+            <span class="create-mode-description">
+              All four hands remain visible to every player throughout the game.
+            </span>
+          </button>
+        </div>
+      </template>
+    </UModal>
 
     <!-- Proper Nuxt UI v4 modal usage -->
     <UModal
@@ -178,6 +210,7 @@ const router = useRouter()
 
 const isAdminUser = computed(() => isAdmin.value === 'true' || isAdmin.value === true)
 const isCreatingGame = ref(false)
+const isCreateGameModalOpen = ref(false)
 
 const { data: profileResponse, pending: profilePending, error: profileError, refresh: refreshProfile } =
   await useFetch('/api/profile', {
@@ -294,17 +327,23 @@ const saveProfile = async () => {
   }
 }
 
-const startNewGame = async () => {
+const openCreateGameModal = () => {
+  isCreateGameModalOpen.value = true
+}
+
+const startNewGame = async (teachingMode = false) => {
   if (isCreatingGame.value) return
   isCreatingGame.value = true
   try {
     const response = await $fetch('/api/game/create', {
       method: 'POST',
+      body: { teachingMode },
       headers: { 'Cache-Control': 'no-cache' }
     })
 
     if (response && response.success) {
       const { gameId, playerId } = response.data || {}
+      isCreateGameModalOpen.value = false
       return navigateTo(`/gameroom/${gameId}?playerId=${playerId}`)
     }
     console.error('Unexpected response creating game:', response)
@@ -427,6 +466,54 @@ const logout = async () => {
   opacity: 0.85;
 }
 
+.create-mode-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.create-mode-card {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  padding: 20px;
+  min-height: 138px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  text-align: left;
+  color: #e8f8ef;
+  background: linear-gradient(145deg, rgba(20, 64, 45, 0.96), rgba(10, 36, 25, 0.96));
+  cursor: pointer;
+  transition: transform 0.12s ease, border-color 0.12s ease, filter 0.12s ease;
+}
+
+.create-mode-card.teaching {
+  background: linear-gradient(145deg, rgba(62, 69, 153, 0.96), rgba(35, 39, 96, 0.96));
+}
+
+.create-mode-card:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.28);
+  filter: brightness(1.08);
+}
+
+.create-mode-card:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.create-mode-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.create-mode-description {
+  font-size: 0.85rem;
+  line-height: 1.45;
+  opacity: 0.85;
+}
+
 .profile-modal-shell {
   width: min(560px, 100%);
   margin: 0 auto;
@@ -483,6 +570,14 @@ const logout = async () => {
   .mahjong-button {
     font-size: 0.85rem;
     padding: 10px 18px;
+  }
+
+  .create-mode-options {
+    grid-template-columns: 1fr;
+  }
+
+  .create-mode-card {
+    min-height: 112px;
   }
 }
 

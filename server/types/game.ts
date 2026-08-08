@@ -114,6 +114,7 @@ export enum GameEndReason {
 
 export interface GameState {
   gameId: string;
+  teachingMode: boolean;
   phase: GamePhase;
   endReason: GameEndReason | null;
   players: Player[];
@@ -162,6 +163,7 @@ export interface GameResult {
 // API request/response types
 export interface CreateGameRequest {
   playerName: string;
+  teachingMode?: boolean;
 }
 
 export interface CreateGameResponse {

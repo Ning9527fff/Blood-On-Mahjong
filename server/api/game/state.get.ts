@@ -44,7 +44,7 @@ export default defineEventHandler(async (event) => {
   const availableActions = await gameManager.getAvailableActions(normalizedGameId, normalizedPlayerId);
 
   const maskedPlayers = game.players.map((p) => {
-    const shouldReveal = isAdminUser || p.id === normalizedPlayerId;
+    const shouldReveal = game.teachingMode || isAdminUser || p.id === normalizedPlayerId;
 
     return {
       ...p,

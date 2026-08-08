@@ -114,6 +114,7 @@ export enum GameEndReason {
 
 export interface GameState {
   gameId: string;
+  teachingMode: boolean;
   phase: GamePhase;
   endReason: GameEndReason | null;
   players: Player[];

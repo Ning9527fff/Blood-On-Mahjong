@@ -45,7 +45,10 @@
         <ul v-else class="available-list">
           <li v-for="game in waitingGames" :key="game.gameId" class="available-item">
             <div class="available-details">
-              <span class="available-id">{{ game.gameId }}</span>
+              <div class="available-title-row">
+                <span class="available-id">{{ game.gameId }}</span>
+                <span v-if="game.teachingMode" class="mode-badge">Teaching · Open Hands</span>
+              </div>
               <span class="available-meta">{{ game.playerCount }}/4 players · Dealer: {{ game.dealerName || 'TBD' }}</span>
             </div>
             <button class="mahjong-button secondary join" @click="joinExistingGame(game.gameId)">
@@ -233,9 +236,26 @@ onMounted(() => {
   gap: 4px;
 }
 
+.available-title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .available-id {
   font-weight: 600;
   letter-spacing: 0.02em;
+}
+
+.mode-badge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  color: #e6e1ff;
+  background: rgba(105, 90, 220, 0.28);
+  border: 1px solid rgba(185, 175, 255, 0.3);
+  font-size: 0.72rem;
+  font-weight: 600;
 }
 
 .available-meta {

@@ -3,6 +3,7 @@ import type { MahjongGame } from '../../types/database'
 
 interface WaitingGameSummary {
   gameId: string
+  teachingMode: boolean
   playerCount: number
   updatedAt: string
   createdAt: string
@@ -20,6 +21,7 @@ export default defineEventHandler(async () => {
 
   const summaries: WaitingGameSummary[] = waitingGames.map((game) => ({
     gameId: game.gameId,
+    teachingMode: game.teachingMode ?? false,
     playerCount: game.players.length,
     createdAt: game.createdAt?.toISOString?.() ?? new Date(0).toISOString(),
     updatedAt: game.updatedAt?.toISOString?.() ?? new Date(0).toISOString(),

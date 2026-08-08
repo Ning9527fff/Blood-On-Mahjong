@@ -7,6 +7,9 @@
           <h1 class="mahjong-title">Mahjong Room</h1>
           <p class="mahjong-subtitle">
             血战到底 · Room #{{ roomId }}
+            <span v-if="gameState?.teachingMode" class="teaching-badge">
+              Teaching Mode · All hands visible
+            </span>
           </p>
         </div>
 
@@ -53,7 +56,12 @@
                 <span v-else>{{ turnMessage }}</span>
               </p>
               <p class="hint">
-                Click tiles to select; click again to discard. Draws happen automatically after each discard.
+                <template v-if="gameState?.teachingMode">
+                  Teaching mode is active: every player's concealed tiles are visible.
+                </template>
+                <template v-else>
+                  Click tiles to select; click again to discard. Draws happen automatically after each discard.
+                </template>
               </p>
             </div>
             <!-- Top player -->
@@ -119,6 +127,9 @@
             <p class="panel-subtitle">
               Players: {{ gameState?.players.length || 0 }}/4
               · AI: {{ aiPlayerCount }}
+            </p>
+            <p class="panel-subtitle">
+              Mode: {{ gameState?.teachingMode ? 'Teaching · Open Hands' : 'Standard · Hidden Hands' }}
             </p>
             <button
               v-if="openSeatCount > 0"
@@ -278,7 +289,9 @@ const backToLobby = () => navigateTo('/')
 const isAdmin = useCookie('is_admin')
 const isAdminUser = computed(() => isAdmin.value === 'true' || isAdmin.value === true)
 const showAllCards = ref(false)
-const shouldRevealOpponents = computed(() => isAdminUser.value && showAllCards.value)
+const shouldRevealOpponents = computed(
+  () => Boolean(gameState.value?.teachingMode) || (isAdminUser.value && showAllCards.value)
+)
 const isMobilePortrait = ref(false)
 const shouldRotateView = computed(() => isMobilePortrait.value)
 
@@ -664,6 +677,18 @@ const forceDiscard = async (p: Player) => {
 .mahjong-subtitle {
   font-size: 0.9rem;
   opacity: 0.85;
+}
+
+.teaching-badge {
+  display: inline-flex;
+  margin-left: 8px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  color: #e6e1ff;
+  background: rgba(105, 90, 220, 0.3);
+  border: 1px solid rgba(185, 175, 255, 0.35);
+  font-size: 0.76rem;
+  font-weight: 600;
 }
 
 .room-main {

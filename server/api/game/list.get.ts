@@ -8,6 +8,7 @@ export default defineEventHandler(async (event) => {
     data: {
       games: games.map(g => ({
         gameId: g.gameId,
+        teachingMode: g.teachingMode,
         phase: g.phase,
         playerCount: g.players.length,
         roundNumber: g.roundNumber,

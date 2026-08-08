@@ -84,6 +84,11 @@ key is read only by the server and must never be exposed through client-side
 runtime configuration. If DeepSeek is unavailable, AI players use a small local
 fallback policy so the round does not become stuck.
 
+When creating a room, the owner can choose Standard Mode or Teaching Mode.
+Standard rooms hide opponents' concealed tiles. Teaching rooms reveal all four
+hands to every participant for the entire game and are labeled in the room list
+and at the table.
+
 Open the login page and enter a 2–32 character ID containing letters, numbers,
 underscores, or hyphens. New IDs are created automatically. This intentionally
 has no password, so anyone who knows an ID can use the same identity.

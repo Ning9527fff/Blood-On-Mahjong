@@ -75,7 +75,10 @@ export default defineEventHandler(async (event) => {
             ...p,
             hand: {
               ...p.hand,
-              concealedTiles: p.id === playerId ? p.hand.concealedTiles : []
+              concealedTiles:
+                game!.teachingMode || p.id === playerId
+                  ? p.hand.concealedTiles
+                  : []
             }
           }))
         },

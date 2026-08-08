@@ -199,6 +199,9 @@ export class DeepSeekAIService {
           position: opponent.position,
           status: opponent.status,
           handSize: opponent.hand.concealedTiles.length,
+          concealedTiles: game.teachingMode
+            ? opponent.hand.concealedTiles.map(tileLabel)
+            : undefined,
           exposedMelds: opponent.hand.exposedMelds,
           discardedTiles: opponent.hand.discardedTiles.map(tileLabel)
         })),

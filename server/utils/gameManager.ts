@@ -83,7 +83,11 @@ class GameManager {
   /**
    * Create a new game
    */
-  async createGame(playerId: string, playerName: string): Promise<{ gameId: string; playerId: string }> {
+  async createGame(
+    playerId: string,
+    playerName: string,
+    teachingMode = false
+  ): Promise<{ gameId: string; playerId: string }> {
     await this.hydrateFromDatabase();
 
     const gameId = randomUUID();
@@ -113,6 +117,7 @@ class GameManager {
 
     const game: GameState = {
       gameId,
+      teachingMode,
       phase: GamePhase.WAITING,
       endReason: null,
       players: [player],
