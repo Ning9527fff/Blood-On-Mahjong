@@ -1100,8 +1100,13 @@ const forceDiscard = async (p: Player) => {
     align-items: start;
   }
 
+  .table-wrapper {
+    min-width: 0;
+  }
+
   .mahjong-table {
-    max-height: calc(100dvh - 76px);
+    height: calc(100dvh - 124px);
+    max-height: none;
     width: auto;
     max-width: 100%;
   }
