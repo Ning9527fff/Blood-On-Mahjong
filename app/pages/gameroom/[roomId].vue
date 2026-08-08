@@ -721,7 +721,7 @@ const forceDiscard = async (p: Player) => {
   padding: 6px 14px;
   font-size: 0.75rem;
   margin-bottom: 6px;
-  display: inline-block;
+  display: none;
 }
 
 .status {
@@ -923,6 +923,10 @@ const forceDiscard = async (p: Player) => {
       max(8px, env(safe-area-inset-right))
       max(8px, env(safe-area-inset-bottom))
       max(8px, env(safe-area-inset-left));
+  }
+
+  .mobile-scroll-notice {
+    display: inline-block;
   }
 
   .room-container {
